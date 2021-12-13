@@ -12,7 +12,7 @@ public class Chromosome {
     public Chromosome(){
 
         chromosomeArray =new ArrayList<>();
-        generateRandomChromosome();
+
 
     }
 
@@ -60,4 +60,15 @@ public class Chromosome {
 
     }
 
+    public static int getGeneNumber() {
+        return GENE_NUMBER;
+    }
+
+    public ArrayList<Integer> getChromosomeArray() {
+        return chromosomeArray;
+    }
+
+    public void setChromosomeArray(ArrayList<Integer> chromosomeArray) {
+        this.chromosomeArray = chromosomeArray;
+    }
 }
