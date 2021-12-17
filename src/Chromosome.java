@@ -3,32 +3,34 @@ import java.util.Random;
 
 public class Chromosome {
 
-    final static int GENE_NUMBER =8;
-    ArrayList<Integer> chromosomeArray;
-    //column -> index
-    //row -> value
+    private final int problemSize;
+    private int rate;
+    private ArrayList<Integer> chromosomeArray;
 
 
-    public Chromosome(){
+    public Chromosome(int problemSize) {
 
-        chromosomeArray =new ArrayList<>();
+        this.problemSize = problemSize;
+        this.rate=0;
+        chromosomeArray = new ArrayList<>();
+
 
 
     }
 
-    public void generateRandomChromosome(){
+    public void generateRandomChromosome() {
 
-        Random random=new Random();
+        Random random = new Random();
 
-        for (int i = 0; i< GENE_NUMBER; i++){
+        for (int i = 0; i < problemSize; i++) {
 
             int randomNUmber;
 
-            randomNUmber=random.nextInt()%8;
-            if(randomNUmber<0)
-                randomNUmber*=-1;
+            randomNUmber = random.nextInt() % problemSize;
+            if (randomNUmber < 0)
+                randomNUmber *= -1;
 
-           chromosomeArray.add(randomNUmber);
+            chromosomeArray.add(randomNUmber);
 
         }
     }
@@ -54,14 +56,14 @@ public class Chromosome {
     }
 
 
-    public int getRow(int col){
+    public int getRow(int col) {
 
         return chromosomeArray.get(col);
 
     }
 
-    public static int getGeneNumber() {
-        return GENE_NUMBER;
+    public int getProblemSize(){
+        return this.problemSize;
     }
 
     public ArrayList<Integer> getChromosomeArray() {
@@ -70,5 +72,13 @@ public class Chromosome {
 
     public void setChromosomeArray(ArrayList<Integer> chromosomeArray) {
         this.chromosomeArray = chromosomeArray;
+    }
+
+    public int getRate() {
+        return rate;
+    }
+
+    public void setRate(int rate) {
+        this.rate = rate;
     }
 }
