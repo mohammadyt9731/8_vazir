@@ -2,11 +2,13 @@ import java.util.*;
 
 public class Program {
 
-    //tedad kol jaigasht ha = 40320
     private final static int PROBLEM_SIZE = 8;//N QUEEN
-    private final static int POPULATION_SIZE = 400;
-    private final static int PARENT_SELECTED_SIZE = 300;
-    private final static double P_MUTATION = 0.3;
+
+    private final static int POPULATION_SIZE = 200;
+
+    private final static int P_CROSS_OVER = (int) (POPULATION_SIZE * 0.7);
+    private final static double P_MUTATION = 0.1;
+    private final static double P_REPLACEMENT = 0.3;
 
     private static int epoch = 0;
     private final static int MAX_EPOCH = 10000;
@@ -22,21 +24,60 @@ public class Program {
         populationList = initPopulation(POPULATION_SIZE, PROBLEM_SIZE);
         fitnessPopulation(populationList);
 
+/*
+        printPopulation(populationList);
 
-        if (populationList.get(0).getRate() == 0){
+
+        //      printRate(parentList=randomSelectParent(populationList));
+//        printRate(parentList=ratingSelectParent(populationList));
+//        printRate(parentList=cuttingSelectParent(populationList));
+
+
+        parentList = randomSelectParent(populationList);
+//
+        printPopulation(parentList);
+//
+        childList = onePointCrossOver(parentList);
+        mutation(childList, P_MUTATION);
+//
+        printPopulation(childList);
+//
+        populationList = replacePopulation(parentList, childList);
+//
+        printPopulation(populationList);*/
+
+
+        //  childList=multiPointCrossOver(parentList);
+        //  childList=uniformCrossOver(parentList);
+        //   compareParentWithChild(parentList,childList);
+
+
+//        System.out.println(childList.get(0).getChromosomeArray());
+//        mutation(childList,P_MUTATION);
+//        System.out.println(childList.get(0).getChromosomeArray());
+
+
+
+
+        if (populationList.get(0).getRate() == 0) {
             System.out.println("epoch " + epoch + " : " + populationList.get(0).getChromosomeArray());
             populationList.get(0).print_chess();
-
-
         }
-
         else {
 
             while (epoch < MAX_EPOCH) {
 
-                parentList = selectParent(populationList, POPULATION_SIZE);
-                childList = crossOver(parentList);
+                parentList = randomSelectParent(populationList);
+                //parentList = ratingSelectParent(populationList);
+                // parentList = cuttingSelectParent(populationList);
+
+
+                // childList = onePointCrossOver(parentList);
+                //childList = multiPointCrossOver(parentList);
+                 childList = uniformCrossOver(parentList);
+
                 mutation(childList, P_MUTATION);
+
                 fitnessPopulation(childList);
 
                 populationList = replacePopulation(populationList, childList);
@@ -44,8 +85,9 @@ public class Program {
 
                 System.out.println("epoch " + epoch++ + " : " + populationList.get(0).getChromosomeArray());
 
+
                 if (populationList.get(0).getRate() == 0) {
-                    System.out.println("found answer");
+                    System.out.println("found answer in epoch "+(epoch-1));
                     populationList.get(0).print_chess();
                     break;
                 }
@@ -60,10 +102,42 @@ public class Program {
         for (Chromosome chromosome : list)
             System.out.println(chromosome.getRate() + " , ");
 
-        System.out.println("\n\n");
+        System.out.println("***************************************");
 
     }
 
+    public static void printPopulation(ArrayList<Chromosome> population) {
+
+        for (Chromosome chromosome : population) {
+            System.out.println(chromosome.getChromosomeArray());
+        }
+
+        System.out.println(population.size());
+
+        System.out.println("///////////////////////////////////");
+    }
+
+    public static void compareParentWithChild(ArrayList<Chromosome> parentList, ArrayList<Chromosome> childList) {
+
+        System.out.println(parentList.get(0).getChromosomeArray());
+        System.out.println(parentList.get(1).getChromosomeArray());
+        System.out.println("**************************************");
+        System.out.println(childList.get(0).getChromosomeArray());
+        System.out.println(childList.get(1).getChromosomeArray());
+
+    }
+
+    public static int generateRandomNumber(int modular) {
+
+        Random random = new Random();
+        int randomNumber = random.nextInt() % modular;
+        if (randomNumber < 0)
+            randomNumber *= -1;
+
+        return randomNumber;
+    }
+
+    /////////////////////////////////////////////////////////////////////////
     public static ArrayList<Chromosome> initPopulation(int populationSize, int problemSize) {
 
         ArrayList<Chromosome> population = new ArrayList<>();
@@ -89,11 +163,11 @@ public class Program {
         for (Chromosome chromosome : populationList) {
             threat = 0;
 
-            for (int j = 0; j < problemSize; j++) {
-                for (int k = j + 1; k < problemSize; k++) {
-                    if (chromosome.getRow(j) == chromosome.getRow(k))
+            for (int i = 0; i < problemSize; i++) {
+                for (int j = i + 1; j < problemSize; j++) {
+                    if (chromosome.getRow(i) == chromosome.getRow(j))
                         threat++;
-                    if (Math.abs(j - k) == Math.abs(chromosome.getRow(j) - chromosome.getRow(k)))
+                    if (Math.abs(i - j) == Math.abs(chromosome.getRow(i) - chromosome.getRow(j)))
                         threat++;
                 }
 
@@ -112,45 +186,67 @@ public class Program {
 
     }
 
+    /////////////////////////////////////////////////////////////////////////
 
-    public static ArrayList<Chromosome> selectParent(ArrayList<Chromosome> population, int populationSize) {
+    public static ArrayList<Chromosome> randomSelectParent(ArrayList<Chromosome> populationList) {
 
-        Random random = new Random();
         ArrayList<Chromosome> randomParent = new ArrayList<>();
 
-        for (int i = 0; i < PARENT_SELECTED_SIZE; i++) {
+        for (int i = 0; i < P_CROSS_OVER; i++) {
 
-            int randomIndex = random.nextInt() % populationSize;
+            int randomIndex = generateRandomNumber(POPULATION_SIZE);
+            randomParent.add(populationList.get(randomIndex));
 
-            if (randomIndex < 0)
-                randomIndex *= -1;
-
-            randomParent.add(population.get(randomIndex));
         }
 
-
-//        randomParent.sort(new Comparator<Chromosome>() {
-//            @Override
-//            public int compare(Chromosome o1, Chromosome o2) {
-//
-//                return Integer.compare(o1.getRate(), o2.getRate());
-//
-//            }
-//        });
-//
-//        ArrayList<Chromosome> selectedParent = new ArrayList<>();
-//
-//        for (int i = 0; i < randomParent.size() / 2; i++) {
-//
-//            selectedParent.add(randomParent.get(i));
-//
-//        }
 
         return randomParent;
 
     }
 
-    public static ArrayList<Chromosome> crossOver(ArrayList<Chromosome> parentList) {
+    public static ArrayList<Chromosome> ratingSelectParent(ArrayList<Chromosome> populationList) {
+
+
+        ArrayList<Chromosome> ratingParent = new ArrayList<>();
+
+
+        for (int i = 0; i < P_CROSS_OVER; i++) {
+            ratingParent.add(populationList.get(i));
+
+        }
+
+        return ratingParent;
+    }
+
+    public static ArrayList<Chromosome> cuttingSelectParent(ArrayList<Chromosome> populationList) {
+
+        ArrayList<Chromosome> bestParent = new ArrayList<>();
+        ArrayList<Chromosome> randomParent = new ArrayList<>();
+
+        int bestSelectedSize = (int) (POPULATION_SIZE * 0.8);
+
+
+        for (int i = 0; i < bestSelectedSize; i++) {
+
+            bestParent.add(populationList.get(i));
+        }
+
+
+        for (int i = 0; i < P_CROSS_OVER; i++) {
+
+            int randomIndex = generateRandomNumber(bestSelectedSize);
+
+            randomParent.add(bestParent.get(randomIndex));
+        }
+
+
+        return randomParent;
+
+    }
+
+    /////////////////////////////////////////////////////////////////////////
+
+    public static ArrayList<Chromosome> onePointCrossOver(ArrayList<Chromosome> parentList) {
 
         ArrayList<Chromosome> childList = new ArrayList<>();
 
@@ -165,14 +261,14 @@ public class Program {
             int point = 3;
 
             for (int i = 0; i < point; i++) {
-                child_1.getChromosomeArray().add(i, parent_1.getChromosomeArray().get(i));
-                child_2.getChromosomeArray().add(i, parent_2.getChromosomeArray().get(i));
+                child_1.getChromosomeArray().add(parent_1.getChromosomeArray().get(i));
+                child_2.getChromosomeArray().add(parent_2.getChromosomeArray().get(i));
 
             }
 
             for (int j = point; j < parent_1.getChromosomeArray().size(); j++) {
-                child_1.getChromosomeArray().add(j, parent_2.getChromosomeArray().get(j));
-                child_2.getChromosomeArray().add(j, parent_1.getChromosomeArray().get(j));
+                child_1.getChromosomeArray().add(parent_2.getChromosomeArray().get(j));
+                child_2.getChromosomeArray().add(parent_1.getChromosomeArray().get(j));
 
             }
 
@@ -185,6 +281,98 @@ public class Program {
         return childList;
 
     }
+
+    public static ArrayList<Chromosome> multiPointCrossOver(ArrayList<Chromosome> parentList) {
+
+        ArrayList<Chromosome> childList = new ArrayList<>();
+
+        for (int k = 0; k < parentList.size(); k += 2) {
+
+
+            Chromosome parent_1 = parentList.get(k);
+            Chromosome parent_2 = parentList.get(k + 1);
+            Chromosome child_1 = new Chromosome(PROBLEM_SIZE);
+            Chromosome child_2 = new Chromosome(PROBLEM_SIZE);
+
+            int point1 = 2;
+            int point2 = 5;
+
+            for (int i = 0; i < point1; i++) {
+                child_1.getChromosomeArray().add(parent_1.getChromosomeArray().get(i));
+                child_2.getChromosomeArray().add(parent_2.getChromosomeArray().get(i));
+
+            }
+
+            for (int i = point1; i < point2; i++) {
+                child_1.getChromosomeArray().add(parent_2.getChromosomeArray().get(i));
+                child_2.getChromosomeArray().add(parent_1.getChromosomeArray().get(i));
+
+            }
+
+
+            for (int j = point2; j < parent_1.getChromosomeArray().size(); j++) {
+                child_1.getChromosomeArray().add(parent_1.getChromosomeArray().get(j));
+                child_2.getChromosomeArray().add(parent_2.getChromosomeArray().get(j));
+
+            }
+
+            childList.add(child_1);
+            childList.add(child_2);
+
+        }
+
+
+        return childList;
+
+    }
+
+    public static ArrayList<Chromosome> uniformCrossOver(ArrayList<Chromosome> parentList) {
+
+
+        ArrayList<Chromosome> childList = new ArrayList<>();
+
+        for (int k = 0; k < parentList.size(); k += 2) {
+
+
+            Chromosome parent_1 = parentList.get(k);
+            Chromosome parent_2 = parentList.get(k + 1);
+            Chromosome child_1 = new Chromosome(PROBLEM_SIZE);
+            Chromosome child_2 = new Chromosome(PROBLEM_SIZE);
+
+
+            for (int i = 0; i < parent_1.getProblemSize(); i++) {
+
+                int randomNumber = generateRandomNumber(2);
+
+                if (randomNumber == 0) {
+
+                    child_1.getChromosomeArray().add(parent_1.getChromosomeArray().get(i));
+                    child_2.getChromosomeArray().add(parent_2.getChromosomeArray().get(i));
+
+
+                } else {
+
+                    child_1.getChromosomeArray().add(parent_2.getChromosomeArray().get(i));
+                    child_2.getChromosomeArray().add(parent_1.getChromosomeArray().get(i));
+
+                }
+
+
+            }
+
+
+            childList.add(child_1);
+            childList.add(child_2);
+
+        }
+
+
+        return childList;
+
+    }
+
+
+    /////////////////////////////////////////////////////////////////////////
 
     public static void mutation(ArrayList<Chromosome> childList, double p_mutation) {
 
@@ -199,25 +387,12 @@ public class Program {
 
             if (randomProb < p_mutation) {
 
-                int randomIndex1, randomIndex2;
 
-                randomIndex1 = random.nextInt() % 8;
-                if (randomIndex1 < 0)
-                    randomIndex1 *= -1;
+                int randomGeneIndex = generateRandomNumber(PROBLEM_SIZE);
+                int randomValue = generateRandomNumber(PROBLEM_SIZE);
 
-                do {
-                    randomIndex2 = random.nextInt() % 8;
-                    if (randomIndex2 < 0)
-                        randomIndex2 *= -1;
+                chromosome.getChromosomeArray().set(randomGeneIndex, randomValue);
 
-                } while (randomIndex1 == randomIndex2);
-
-                int temp1 = chromosome.getChromosomeArray().get(randomIndex1);
-                int temp2 = chromosome.getChromosomeArray().get(randomIndex2);
-
-
-                chromosome.getChromosomeArray().set(randomIndex1, temp2);
-                chromosome.getChromosomeArray().set(randomIndex2, temp1);
 
             }
 
@@ -227,17 +402,25 @@ public class Program {
 
     }
 
-    public static ArrayList<Chromosome> replacePopulation(ArrayList<Chromosome> populationList, ArrayList<Chromosome> childList) {
+    /////////////////////////////////////////////////////////////////////////
+
+    public static ArrayList<Chromosome> replacePopulation(ArrayList<Chromosome> parentList, ArrayList<Chromosome> childList) {
 
 
         ArrayList<Chromosome> newPopulation = new ArrayList<>();
 
 
-        for (int i = 0; i < POPULATION_SIZE-PARENT_SELECTED_SIZE; i++)
-            newPopulation.add(populationList.get(i));
+        int parentSelectedSize = (int) (POPULATION_SIZE * (1 - P_REPLACEMENT));
+        for (int i = 0; i < parentSelectedSize; i++)
+            newPopulation.add(parentList.get(i));
 
 
-        for (int i = 0; i < childList.size(); i++)
+        int childSelectedSize = (int) (POPULATION_SIZE * P_REPLACEMENT);
+
+        if (parentSelectedSize + childSelectedSize < POPULATION_SIZE)
+            childSelectedSize++;
+
+        for (int i = 0; i < childSelectedSize; i++)
             newPopulation.add(childList.get(i));
 
 
@@ -245,64 +428,6 @@ public class Program {
 
 
     }
-
-
-
-
-
-
-
-/*
-    public static int threatForOneQueen(Chromosome chromosome, int col) {
-
-        int row = chromosome.getRow(col);
-        int threat = 0;
-        for (int i = 0; i < chromosome.getProblemSize(); i++) {
-
-            if (i != col) {
-
-                int otherRow = chromosome.getRow(i);
-
-                if (row == otherRow)//dar yek satr
-                    threat++;
-                else if (row > otherRow && otherRow + Math.abs(col - i) == row)
-                    threat++;
-                else if (row < otherRow && otherRow - Math.abs(col - i) == row)
-                    threat++;
-            }
-
-
-        }
-
-
-        return threat;
-
-    }
-
-    public static int threatForOneChromosome(Chromosome chromosome) {
-
-        int sumThreat = 0;
-
-        for (int i = 0; i < chromosome.getProblemSize() ;i++) {
-
-            sumThreat += threatForOneQueen(chromosome, i);
-
-        }
-        return sumThreat;
-
-    }
-
-    public static double fitnessChromosome(Chromosome chromosome) {
-
-        int threat = threatForOneChromosome(chromosome);
-
-        if (threat == 0)
-            return 2;//javab masAle
-        else
-            return 1 / (double) threat;//har che bozorg tar bashe behtare
-    }
-
-    */
 
 
 }
