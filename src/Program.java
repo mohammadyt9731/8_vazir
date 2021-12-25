@@ -6,9 +6,11 @@ public class Program {
 
     private final static int POPULATION_SIZE = 200;
 
-    private final static int P_CROSS_OVER = (int) (POPULATION_SIZE * 0.7);
+    private final static double P_CROSS_OVER = 0.8;
     private final static double P_MUTATION = 0.1;
     private final static double P_REPLACEMENT = 0.3;
+
+    private final static int PARENT_LIST_SIZE = (int) (POPULATION_SIZE * P_CROSS_OVER);
 
     private static int epoch = 0;
     private final static int MAX_EPOCH = 10000;
@@ -16,6 +18,7 @@ public class Program {
 
     public static void main(String[] args) {
 
+        long startTime = System.currentTimeMillis();
 
         ArrayList<Chromosome> populationList;
         ArrayList<Chromosome> parentList;
@@ -44,7 +47,7 @@ public class Program {
 //
         populationList = replacePopulation(parentList, childList);
 //
-        printPopulation(populationList);*/
+        printPopulation(populationList);
 
 
         //  childList=multiPointCrossOver(parentList);
@@ -56,44 +59,50 @@ public class Program {
 //        mutation(childList,P_MUTATION);
 //        System.out.println(childList.get(0).getChromosomeArray());
 
-
+*/
 
 
         if (populationList.get(0).getRate() == 0) {
             System.out.println("epoch " + epoch + " : " + populationList.get(0).getChromosomeArray());
             populationList.get(0).print_chess();
-        }
-        else {
+            System.out.println("found answer in epoch " + (epoch));
+
+        } else {
 
             while (epoch < MAX_EPOCH) {
 
-                parentList = randomSelectParent(populationList);
-                //parentList = ratingSelectParent(populationList);
-                // parentList = cuttingSelectParent(populationList);
+                //parentList = randomSelectParent(populationList);
+                parentList = ratingSelectParent(populationList);
+                //parentList = cuttingSelectParent(populationList);
 
+                Collections.shuffle(parentList);
 
                 // childList = onePointCrossOver(parentList);
                 //childList = multiPointCrossOver(parentList);
-                 childList = uniformCrossOver(parentList);
+                childList = uniformCrossOver(parentList);
 
                 mutation(childList, P_MUTATION);
 
                 fitnessPopulation(childList);
 
-                populationList = replacePopulation(populationList, childList);
+                populationList = steadyStateReplacement(populationList, childList);
+                // populationList = generationalReplacement(populationList, childList);
                 fitnessPopulation(populationList);
 
                 System.out.println("epoch " + epoch++ + " : " + populationList.get(0).getChromosomeArray());
 
 
                 if (populationList.get(0).getRate() == 0) {
-                    System.out.println("found answer in epoch "+(epoch-1));
+                    System.out.println("found answer in epoch " + (epoch - 1));
                     populationList.get(0).print_chess();
                     break;
                 }
             }
         }
 
+
+        long endTime = System.currentTimeMillis();
+        System.out.println("time : " + (endTime - startTime) + " milliseconds");
 
     }
 
@@ -157,14 +166,13 @@ public class Program {
 
     public static void fitnessPopulation(ArrayList<Chromosome> populationList) {
 
-        int problemSize = populationList.get(0).getProblemSize();
         int threat = 0;
 
         for (Chromosome chromosome : populationList) {
             threat = 0;
 
-            for (int i = 0; i < problemSize; i++) {
-                for (int j = i + 1; j < problemSize; j++) {
+            for (int i = 0; i < PROBLEM_SIZE; i++) {
+                for (int j = i + 1; j < PROBLEM_SIZE; j++) {
                     if (chromosome.getRow(i) == chromosome.getRow(j))
                         threat++;
                     if (Math.abs(i - j) == Math.abs(chromosome.getRow(i) - chromosome.getRow(j)))
@@ -190,57 +198,51 @@ public class Program {
 
     public static ArrayList<Chromosome> randomSelectParent(ArrayList<Chromosome> populationList) {
 
-        ArrayList<Chromosome> randomParent = new ArrayList<>();
+        ArrayList<Chromosome> randomParentList = new ArrayList<>();
 
-        for (int i = 0; i < P_CROSS_OVER; i++) {
+        for (int i = 0; i < PARENT_LIST_SIZE; i++) {
 
             int randomIndex = generateRandomNumber(POPULATION_SIZE);
-            randomParent.add(populationList.get(randomIndex));
+            randomParentList.add(populationList.get(randomIndex));
 
         }
 
 
-        return randomParent;
+        return randomParentList;
 
     }
 
     public static ArrayList<Chromosome> ratingSelectParent(ArrayList<Chromosome> populationList) {
 
 
-        ArrayList<Chromosome> ratingParent = new ArrayList<>();
+        ArrayList<Chromosome> ratingParentList = new ArrayList<>();
 
-
-        for (int i = 0; i < P_CROSS_OVER; i++) {
-            ratingParent.add(populationList.get(i));
-
+        for (int i = 0; i < PARENT_LIST_SIZE; i++) {
+            ratingParentList.add(populationList.get(i));
         }
 
-        return ratingParent;
+        return ratingParentList;
     }
 
     public static ArrayList<Chromosome> cuttingSelectParent(ArrayList<Chromosome> populationList) {
 
-        ArrayList<Chromosome> bestParent = new ArrayList<>();
-        ArrayList<Chromosome> randomParent = new ArrayList<>();
-
-        int bestSelectedSize = (int) (POPULATION_SIZE * 0.8);
+        ArrayList<Chromosome> bestParentList = new ArrayList<>();
+        ArrayList<Chromosome> cuttingParentList = new ArrayList<>();
 
 
-        for (int i = 0; i < bestSelectedSize; i++) {
-
-            bestParent.add(populationList.get(i));
+        for (int i = 0; i < PARENT_LIST_SIZE; i++) {
+            bestParentList.add(populationList.get(i));
         }
 
 
-        for (int i = 0; i < P_CROSS_OVER; i++) {
+        for (int i = 0; i < PARENT_LIST_SIZE; i++) {
 
-            int randomIndex = generateRandomNumber(bestSelectedSize);
-
-            randomParent.add(bestParent.get(randomIndex));
+            int randomIndex = generateRandomNumber(PARENT_LIST_SIZE);
+            cuttingParentList.add(bestParentList.get(randomIndex));
         }
 
 
-        return randomParent;
+        return cuttingParentList;
 
     }
 
@@ -404,7 +406,7 @@ public class Program {
 
     /////////////////////////////////////////////////////////////////////////
 
-    public static ArrayList<Chromosome> replacePopulation(ArrayList<Chromosome> parentList, ArrayList<Chromosome> childList) {
+    public static ArrayList<Chromosome> steadyStateReplacement(ArrayList<Chromosome> parentList, ArrayList<Chromosome> childList) {
 
 
         ArrayList<Chromosome> newPopulation = new ArrayList<>();
@@ -416,6 +418,31 @@ public class Program {
 
 
         int childSelectedSize = (int) (POPULATION_SIZE * P_REPLACEMENT);
+
+        if (parentSelectedSize + childSelectedSize < POPULATION_SIZE)
+            childSelectedSize++;
+
+        for (int i = 0; i < childSelectedSize; i++)
+            newPopulation.add(childList.get(i));
+
+
+        return newPopulation;
+
+
+    }
+
+    public static ArrayList<Chromosome> generationalReplacement(ArrayList<Chromosome> parentList, ArrayList<Chromosome> childList) {
+
+
+        ArrayList<Chromosome> newPopulation = new ArrayList<>();
+
+        fitnessPopulation(parentList);
+        int parentSelectedSize = (POPULATION_SIZE - PARENT_LIST_SIZE);
+        for (int i = 0; i < parentSelectedSize; i++)
+            newPopulation.add(parentList.get(i));
+
+
+        int childSelectedSize = PARENT_LIST_SIZE;
 
         if (parentSelectedSize + childSelectedSize < POPULATION_SIZE)
             childSelectedSize++;

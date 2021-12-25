@@ -11,11 +11,8 @@ public class Chromosome {
     public Chromosome(int problemSize) {
 
         this.problemSize = problemSize;
-        this.rate=0;
+        this.rate = 0;
         chromosomeArray = new ArrayList<>();
-
-
-
     }
 
     public void generateRandomChromosome() {
@@ -55,23 +52,18 @@ public class Chromosome {
         System.out.println("---------------------------------");
     }
 
-
     public int getRow(int col) {
 
         return chromosomeArray.get(col);
 
     }
 
-    public int getProblemSize(){
+    public int getProblemSize() {
         return this.problemSize;
     }
 
     public ArrayList<Integer> getChromosomeArray() {
         return chromosomeArray;
-    }
-
-    public void setChromosomeArray(ArrayList<Integer> chromosomeArray) {
-        this.chromosomeArray = chromosomeArray;
     }
 
     public int getRate() {
