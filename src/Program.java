@@ -77,9 +77,9 @@ public class Program {
 
                 Collections.shuffle(parentList);
 
-                // childList = onePointCrossOver(parentList);
+                 childList = onePointCrossOver(parentList);
                 //childList = multiPointCrossOver(parentList);
-                childList = uniformCrossOver(parentList);
+                // childList = uniformCrossOver(parentList);
 
                 mutation(childList, P_MUTATION);
 
@@ -260,7 +260,8 @@ public class Program {
             Chromosome child_1 = new Chromosome(PROBLEM_SIZE);
             Chromosome child_2 = new Chromosome(PROBLEM_SIZE);
 
-            int point = 3;
+            int point=generateRandomNumber(PROBLEM_SIZE);
+
 
             for (int i = 0; i < point; i++) {
                 child_1.getChromosomeArray().add(parent_1.getChromosomeArray().get(i));
@@ -296,8 +297,15 @@ public class Program {
             Chromosome child_1 = new Chromosome(PROBLEM_SIZE);
             Chromosome child_2 = new Chromosome(PROBLEM_SIZE);
 
-            int point1 = 2;
-            int point2 = 5;
+            int point1 ;
+            int point2;
+
+            do {
+                point1=generateRandomNumber(PROBLEM_SIZE);
+                point2=generateRandomNumber(PROBLEM_SIZE);
+            }while (point1>=point2);
+
+
 
             for (int i = 0; i < point1; i++) {
                 child_1.getChromosomeArray().add(parent_1.getChromosomeArray().get(i));
